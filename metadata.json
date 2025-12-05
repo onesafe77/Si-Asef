@@ -1,0 +1,7 @@
+{
+  "name": "Si Asef - Safety Assistant",
+  "description": "A ChatGPT-like Safety Assistant AI (Sistem Asisten Safety) designed to help with workplace safety and K3 regulations.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
