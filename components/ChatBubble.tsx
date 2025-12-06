@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { User, ShieldCheck, Copy, Check, RotateCcw, ThumbsUp, ThumbsDown, FileText } from 'lucide-react';
+import { User, ShieldCheck, Copy, Check, RotateCcw, FileText, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Message, Role } from '../types';
 
 interface ChatBubbleProps {
@@ -11,7 +11,10 @@ interface ChatBubbleProps {
 const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onRegenerate }) => {
   const isUser = message.role === Role.USER;
   const [copied, setCopied] = useState(false);
-  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+
+  // Determine states
+  const isThinking = message.role === Role.MODEL && message.isStreaming && !message.content;
+  const isTyping = message.role === Role.MODEL && message.isStreaming && message.content;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(message.content);
@@ -20,18 +23,18 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onRegenerate }) => {
   };
 
   return (
-    <div className={`w-full py-4 px-4 ${isUser ? '' : 'bg-transparent'}`}>
-      <div className={`max-w-3xl mx-auto flex gap-5 md:gap-6 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+    <div className={`w-full py-4 md:py-8 px-4 ${isUser ? '' : 'bg-transparent'}`}>
+      <div className={`max-w-3xl mx-auto flex gap-4 md:gap-6 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         
         {/* Avatar / Icon */}
         <div className="flex-shrink-0 flex flex-col pt-1">
           {isUser ? (
-             <div className="w-9 h-9 bg-zinc-100 rounded-full text-zinc-400 flex items-center justify-center border border-zinc-200">
-                <User className="w-5 h-5" />
+             <div className="w-8 h-8 bg-zinc-200/50 rounded-full text-zinc-500 flex items-center justify-center border border-zinc-200">
+                <span className="font-bold text-xs">US</span>
              </div>
           ) : (
-             <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-2 ring-white">
-                <ShieldCheck className="w-5 h-5" strokeWidth={2} />
+             <div className="w-8 h-8 rounded-lg text-emerald-700 flex items-center justify-center mt-1">
+                <ShieldCheck className="w-6 h-6" strokeWidth={2} />
              </div>
           )}
         </div>
@@ -42,21 +45,20 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onRegenerate }) => {
             ${isUser ? 'flex justify-end' : ''}
         `}>
           <div className={`
-             text-[15px] md:text-[16px] leading-relaxed px-5 py-3.5 rounded-2xl max-w-full md:max-w-[90%]
+             text-[16px] max-w-full
              ${isUser 
-                ? 'bg-zinc-50 border border-zinc-100 text-zinc-800 rounded-tr-sm shadow-sm' 
-                : 'bg-transparent text-zinc-800 prose-content pl-0'}
+                ? 'bg-[#F4F4F5] text-zinc-800 px-5 py-3.5 rounded-2xl rounded-tr-sm font-sans leading-relaxed max-w-[85%]' 
+                : 'bg-transparent text-zinc-800 prose-content pl-0 w-full'}
           `}>
              
-             {/* Name for AI only */}
+             {/* Name for AI only - distinct Claude style header */}
              {!isUser && (
-                <div className="font-bold text-sm text-zinc-900 mb-2 flex items-center gap-2">
+                <div className="font-bold text-sm text-zinc-900 mb-4 select-none font-sans tracking-wide flex items-center gap-2">
                     Si Asef
-                    <span className="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">AI</span>
                 </div>
              )}
 
-             {/* If user sent an image, show it (Mockup) */}
+             {/* If user sent an image */}
              {isUser && message.content.startsWith('[Attachment]') && (
                 <div className="mb-3">
                     <div className="inline-flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-zinc-200 text-xs font-medium text-zinc-600 shadow-sm">
@@ -67,63 +69,82 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onRegenerate }) => {
              )}
 
             {isUser ? (
-              <p className="whitespace-pre-wrap font-sans">{message.content.replace('[Attachment] ', '')}</p>
+              <p className="whitespace-pre-wrap">{message.content.replace('[Attachment] ', '')}</p>
             ) : (
-              <ReactMarkdown 
-                components={{
-                    h3: ({node, ...props}) => <h3 className="text-lg font-bold text-zinc-900 mt-4 mb-2 font-display" {...props} />,
-                    strong: ({node, ...props}) => <strong className="font-bold text-zinc-900" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-4 space-y-1 marker:text-emerald-500" {...props} />,
-                    li: ({node, ...props}) => <li className="pl-1" {...props} />,
-                }}
-              >
-                {message.content}
-              </ReactMarkdown>
-            )}
-            
-            {message.isStreaming && (
-              <div className="inline-flex items-center gap-1.5 mt-2 h-4">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"></span>
-              </div>
+              <>
+                {/* Thinking State */}
+                {isThinking && (
+                    <div className="flex items-center gap-3 py-2 animate-fade-in-up">
+                        <span className="relative flex h-2.5 w-2.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        <span className="text-zinc-400 text-sm font-medium animate-pulse font-sans">Menelusuri regulasi...</span>
+                    </div>
+                )}
+
+                {/* Actual Content - Claude Style: Serif Body, Sans Headers */}
+                {message.content && (
+                    <div className="markdown-body font-serif text-[#2D2D2D]">
+                         <ReactMarkdown 
+                            components={{
+                                // Headings are Sans-Serif for contrast (Claude style)
+                                h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-zinc-900 mt-8 mb-4 font-sans tracking-tight" {...props} />,
+                                h2: ({node, ...props}) => <h2 className="text-xl font-bold text-zinc-900 mt-8 mb-4 font-sans tracking-tight" {...props} />,
+                                h3: ({node, ...props}) => <h3 className="text-lg font-bold text-zinc-900 mt-6 mb-3 font-sans tracking-tight" {...props} />,
+                                
+                                // Body text is Serif (Merriweather)
+                                p: ({node, ...props}) => <p className="mb-5 leading-8 text-zinc-800 font-serif text-[16px]" {...props} />,
+                                strong: ({node, ...props}) => <strong className="font-bold text-zinc-900" {...props} />,
+                                
+                                // Lists
+                                ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-6 space-y-2 marker:text-zinc-400 font-serif leading-7" {...props} />,
+                                ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-6 space-y-2 marker:text-zinc-500 font-serif leading-7" {...props} />,
+                                li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                                
+                                // Blockquotes
+                                blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-emerald-500/50 pl-4 italic text-zinc-600 my-6 bg-zinc-50/50 py-2 rounded-r-lg" {...props} />,
+                            }}
+                        >
+                            {message.content}
+                        </ReactMarkdown>
+                    </div>
+                )}
+                
+                {/* Typing Cursor */}
+                {isTyping && (
+                   <span className="inline-block w-2.5 h-5 bg-emerald-500 ml-1 align-middle animate-pulse"></span>
+                )}
+              </>
             )}
           </div>
 
-          {/* AI Actions Toolbar (Outside the text block for cleaner look) */}
+          {/* Claude-style Feedback Toolbar */}
           {!isUser && !message.isStreaming && message.content && (
-             <div className="flex items-center gap-1 mt-2 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+             <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 select-none">
                 <button 
-                  onClick={handleCopy}
-                  className="p-1.5 text-zinc-400 hover:text-zinc-700 transition-colors rounded-lg hover:bg-zinc-100 flex items-center gap-1.5 text-xs font-medium" 
-                  title="Copy"
+                  onClick={handleCopy} 
+                  className="flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-md transition-all"
                 >
                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                   {copied ? 'Copied' : 'Copy'}
                 </button>
                 
-                {onRegenerate && (
-                    <button 
-                    onClick={onRegenerate}
-                    className="p-1.5 text-zinc-400 hover:text-zinc-700 transition-colors rounded-lg hover:bg-zinc-100" 
-                    title="Regenerate"
-                    >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
-                )}
-
-                <div className="h-3 w-px bg-zinc-200 mx-1"></div>
-
                 <button 
-                    onClick={() => setFeedback(feedback === 'up' ? null : 'up')}
-                    className={`p-1.5 transition-colors rounded-lg hover:bg-zinc-100 ${feedback === 'up' ? 'text-emerald-600 bg-emerald-50' : 'text-zinc-400 hover:text-zinc-700'}`}
+                   onClick={onRegenerate} 
+                   className="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-md transition-all"
+                   title="Regenerate"
                 >
-                   <ThumbsUp className="w-3.5 h-3.5" fill={feedback === 'up' ? 'currentColor' : 'none'} />
+                  <RotateCcw className="w-3.5 h-3.5" />
                 </button>
-                <button 
-                    onClick={() => setFeedback(feedback === 'down' ? null : 'down')}
-                    className={`p-1.5 transition-colors rounded-lg hover:bg-zinc-100 ${feedback === 'down' ? 'text-red-500 bg-red-50' : 'text-zinc-400 hover:text-zinc-700'}`}
-                >
-                   <ThumbsDown className="w-3.5 h-3.5" fill={feedback === 'down' ? 'currentColor' : 'none'} />
+
+                <div className="h-4 w-px bg-zinc-200 mx-1"></div>
+
+                <button className="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-md transition-all">
+                  <ThumbsUp className="w-3.5 h-3.5" />
+                </button>
+                <button className="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-md transition-all">
+                  <ThumbsDown className="w-3.5 h-3.5" />
                 </button>
              </div>
           )}

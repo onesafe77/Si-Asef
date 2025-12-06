@@ -21,6 +21,17 @@ export interface User {
   name: string;
   email: string;
   plan: 'free' | 'pro';
+  role?: 'user' | 'admin'; // Added role
+}
+
+export interface UploadedDocument {
+  id: string;
+  name: string;
+  type: string;
+  content: string; // The actual text content
+  uploadDate: number;
+  size: string;
 }
 
 export type LoadingState = 'idle' | 'streaming' | 'error';
+export type ViewState = 'landing' | 'login' | 'chat' | 'admin';

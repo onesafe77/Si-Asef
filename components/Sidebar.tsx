@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, MessageSquare, Settings, UserCircle, X, Zap, CreditCard, LogOut } from 'lucide-react';
+import { Plus, MessageSquare, Settings, ShieldCheck, X, Zap, LogOut, Database } from 'lucide-react';
 import { ChatSession, User } from '../types';
 
 interface SidebarProps {
@@ -11,6 +11,7 @@ interface SidebarProps {
   onLoadSession: (id: string) => void;
   onOpenUpgrade: () => void;
   onOpenSettings: () => void;
+  onLogout: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -21,7 +22,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onNewChat, 
   onLoadSession, 
   onOpenUpgrade, 
-  onOpenSettings 
+  onOpenSettings,
+  onLogout
 }) => {
   return (
     <>
@@ -39,42 +41,50 @@ const Sidebar: React.FC<SidebarProps> = ({
           fixed md:relative z-30 flex flex-col h-full bg-[#FAFAF9] border-r border-zinc-200
           transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]
           ${isOpen ? 'w-[280px] translate-x-0' : 'w-0 -translate-x-full opacity-0 md:opacity-100'}
-          overflow-hidden
+          overflow-hidden font-sans
         `}
       >
-        <div className="p-4 flex-none w-[280px]">
+        <div className="p-5 flex-none w-[280px]">
            {/* Close button for mobile */}
            <div className="md:hidden w-full flex justify-end mb-2">
              <button onClick={toggleSidebar} className="p-2 text-zinc-500"><X className="w-5 h-5"/></button>
            </div>
            
+           {/* Header Logo Area */}
+           <div className="flex items-center gap-3 mb-6 px-1">
+              <div className="w-8 h-8 bg-zinc-900 text-white rounded-lg flex items-center justify-center shadow-md">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <span className="font-display font-bold text-lg text-zinc-900 tracking-tight">Si Asef</span>
+           </div>
+
            {/* New Chat Button */}
            <button 
             onClick={() => {
               onNewChat();
               if (window.innerWidth < 768) toggleSidebar();
             }}
-            className="w-full flex items-center justify-between px-4 py-3 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:shadow-md hover:bg-zinc-50 transition-all duration-200 group text-sm text-zinc-800 shadow-sm"
+            className="w-full flex items-center gap-3 px-4 py-3 bg-white border border-zinc-200 rounded-xl hover:border-emerald-500 hover:shadow-md hover:shadow-emerald-500/10 hover:text-emerald-700 transition-all duration-200 group text-sm text-zinc-600 shadow-sm font-semibold"
           >
-            <div className="flex items-center gap-2">
-                <Plus className="w-4 h-4 text-asef-blue" strokeWidth={3} />
-                <span className="font-semibold">Mulai Chat Baru</span>
-            </div>
+             <Plus className="w-4 h-4 text-emerald-500" />
+             Mulai Chat Baru
           </button>
         </div>
 
-        {/* History List */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-6 scrollbar-thin w-[280px]">
+        {/* Scrollable Area */}
+        <div className="flex-1 overflow-y-auto px-5 space-y-6 scrollbar-thin w-[280px]">
+          
+          {/* History Section */}
           <div>
-            <h3 className="px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Hari Ini</h3>
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3 px-2">Hari Ini</h3>
             <ul className="space-y-1">
               {sessions.map((session) => (
                 <li key={session.id}>
                   <button 
                     onClick={() => onLoadSession(session.id)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-200/50 transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors text-left group"
                   >
-                    <MessageSquare className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600" />
+                    <MessageSquare className="w-4 h-4 text-zinc-300 group-hover:text-emerald-600 transition-colors" />
                     <span className="text-[13px] truncate text-zinc-600 group-hover:text-zinc-900 font-medium">
                       {session.title}
                     </span>
@@ -84,79 +94,66 @@ const Sidebar: React.FC<SidebarProps> = ({
             </ul>
           </div>
           
-          <div>
-            <h3 className="px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Kemarin</h3>
-            <ul className="space-y-1">
-              <li>
-                <button 
-                  onClick={() => onLoadSession('history-1')}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-200/50 transition-colors text-left group"
-                >
-                  <MessageSquare className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600" />
-                  <span className="text-[13px] truncate text-zinc-600 group-hover:text-zinc-900 font-medium">Prosedur APD Konstruksi</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                   onClick={() => onLoadSession('history-2')}
-                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-200/50 transition-colors text-left group"
-                >
-                   <MessageSquare className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600" />
-                  <span className="text-[13px] truncate text-zinc-600 group-hover:text-zinc-900 font-medium">Analisa Risiko Kebakaran</span>
-                </button>
-              </li>
+           <div>
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3 px-2">Kemarin</h3>
+            <ul className="space-y-1 opacity-60 hover:opacity-100 transition-opacity">
+               <li className="px-3 py-2 text-[13px] text-zinc-500 flex items-center gap-3 cursor-pointer hover:bg-zinc-100 rounded-lg">
+                   <MessageSquare className="w-4 h-4 text-zinc-300" />
+                   Prosedur APD Konstruksi
+               </li>
+               <li className="px-3 py-2 text-[13px] text-zinc-500 flex items-center gap-3 cursor-pointer hover:bg-zinc-100 rounded-lg">
+                   <MessageSquare className="w-4 h-4 text-zinc-300" />
+                   Analisa Risiko Kebakaran
+               </li>
             </ul>
           </div>
+
         </div>
 
-        {/* Upgrade / Account Section */}
-        <div className="p-4 bg-[#FAFAF9] space-y-3 w-[280px]">
-          
-          {/* Upgrade Card */}
-          <div className="p-4 bg-gradient-to-br from-white to-zinc-50 border border-zinc-200 rounded-xl shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Zap className="w-12 h-12 text-asef-gold" />
-            </div>
+        {/* Footer */}
+        <div className="p-5 bg-[#FAFAF9] space-y-3 w-[280px]">
             
-            <div className="relative z-10">
-                <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-bold text-zinc-500 uppercase">Starter Plan</span>
-                    <span className="text-xs font-semibold text-zinc-900">3/5 Chats</span>
-                </div>
-                {/* Progress Bar */}
-                <div className="w-full h-1.5 bg-zinc-200 rounded-full mb-3 overflow-hidden">
-                    <div className="h-full bg-asef-blue rounded-full w-[60%]"></div>
-                </div>
-                
-                <button 
-                    onClick={onOpenUpgrade}
-                    className="w-full py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-zinc-500/20 hover:shadow-zinc-500/30 hover:-translate-y-0.5"
-                >
-                    <Zap className="w-3.5 h-3.5 text-asef-gold" fill="currentColor" />
-                    Upgrade to Pro
-                </button>
-            </div>
-          </div>
+            {/* Upgrade Card */}
+             <div className="p-4 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-800 text-white relative overflow-hidden group cursor-pointer shadow-lg shadow-zinc-900/20" onClick={onOpenUpgrade}>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors"></div>
+                <div className="relative z-10">
+                    <div className="flex justify-between items-start mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Starter Plan</span>
+                        <span className="text-[10px] text-zinc-400">3/5 Chats</span>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full h-1.5 bg-white/10 rounded-full mb-4 overflow-hidden">
+                        <div className="h-full w-[60%] bg-emerald-500 rounded-full"></div>
+                    </div>
 
-          <div className="pt-2 border-t border-zinc-200">
-             <button 
-                onClick={onOpenSettings}
-                className="flex items-center gap-3 w-full px-2 py-2 rounded-lg hover:bg-zinc-200/50 transition-colors text-zinc-700"
-            >
-                <div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-500 shrink-0">
-                    <UserCircle className="w-5 h-5" />
+                    <button className="w-full py-2 bg-white text-zinc-900 rounded-lg text-xs font-bold hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2">
+                        <Zap className="w-3 h-3 fill-emerald-500 text-emerald-500" />
+                        Upgrade to Pro
+                    </button>
                 </div>
-                <div className="flex-1 text-left overflow-hidden">
-                    <p className="text-sm font-semibold text-zinc-900 truncate">
-                      {user ? user.name : 'Safety Officer'}
-                    </p>
-                    <p className="text-[11px] text-zinc-500 truncate">
-                      {user ? user.email : 'Free Account'}
-                    </p>
+            </div>
+
+            <div className="border-t border-zinc-200 pt-3">
+                <div className="flex items-center justify-between group px-2 py-1">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center text-white shrink-0 shadow-sm">
+                            <span className="text-xs font-bold">{user ? user.name.charAt(0) : 'S'}</span>
+                        </div>
+                        <div className="text-left overflow-hidden w-28">
+                            <p className="text-sm font-bold text-zinc-900 truncate">
+                            {user ? user.name : 'Safety Officer'}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 truncate">
+                            {user ? user.email : 'Free Account'}
+                            </p>
+                        </div>
+                    </div>
+                    <button onClick={onOpenSettings} className="text-zinc-400 hover:text-zinc-600">
+                        <Settings className="w-4 h-4" />
+                    </button>
                 </div>
-                <Settings className="w-4 h-4 text-zinc-400 hover:text-zinc-600 shrink-0" />
-            </button>
-          </div>
+            </div>
         </div>
       </aside>
     </>

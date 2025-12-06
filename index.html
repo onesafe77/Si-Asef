@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:wght@300;400;700;900&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:wght@300;400;700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -19,21 +19,31 @@
             },
             colors: {
               asef: {
-                primary: '#0F172A', // Slate 900
-                blue: '#2563EB',
-                gold: '#D97706', // Amber 600 for Premium/Pro
-                bg: '#FAFAF9', // Stone 50 - slightly warmer/premium than pure white
+                primary: '#022c22', // Deep Jungle Green
+                blue: '#059669', // Emerald 600
+                gold: '#D97706', // Amber 600
+                bg: '#FAFAF9', // Stone 50
                 surface: '#FFFFFF',
               }
             },
+            backgroundImage: {
+              'noise': "url('https://grainy-gradients.vercel.app/noise.svg')",
+            },
             boxShadow: {
               'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-              'glow': '0 0 20px -5px rgba(37, 99, 235, 0.15)',
+              'glow': '0 0 30px -5px rgba(5, 150, 105, 0.3)',
               'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+              'neon': '0 0 10px rgba(5, 150, 105, 0.5), 0 0 20px rgba(5, 150, 105, 0.3)',
+              'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
             },
             animation: {
               'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
               'scroll': 'scroll 40s linear infinite',
+              'blob': 'blob 7s infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'float-delayed': 'float 6s ease-in-out 3s infinite',
+              'shimmer': 'shimmer 2s linear infinite',
+              'spin-slow': 'spin 12s linear infinite',
             },
             keyframes: {
               fadeInUp: {
@@ -43,7 +53,21 @@
               scroll: {
                 '0%': { transform: 'translateX(0)' },
                 '100%': { transform: 'translateX(-50%)' },
-              }
+              },
+              blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-20px)' },
+              },
+              shimmer: {
+                from: { backgroundPosition: '0 0' },
+                to: { backgroundPosition: '-200% 0' },
+              },
             }
           },
         },
@@ -102,6 +126,27 @@
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.5);
       }
+      
+      .text-gradient {
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-image: linear-gradient(to right, #10b981, #059669);
+      }
+      
+      .bg-grid-pattern {
+        background-size: 40px 40px;
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+      }
+      
+      .perspective-1000 {
+        perspective: 1000px;
+      }
+      
+      .rotate-y-12 {
+        transform: rotateY(12deg) rotateX(6deg);
+      }
     </style>
   <script type="importmap">
 {
@@ -116,7 +161,7 @@
 }
 </script>
 </head>
-  <body class="bg-asef-bg text-zinc-800 antialiased h-screen overflow-hidden selection:bg-asef-blue/10 selection:text-asef-blue">
+  <body class="bg-asef-bg text-zinc-800 antialiased h-screen overflow-hidden selection:bg-emerald-500/20 selection:text-emerald-900 font-sans">
     <div id="root"></div>
   </body>
 </html>
